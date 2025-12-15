@@ -1,3 +1,7 @@
+require("dotenv").config();//Load environment variables
+const connectDB=require("./db/db")
+connectDB();
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
