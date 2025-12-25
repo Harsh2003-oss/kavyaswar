@@ -60,7 +60,6 @@ PoemSchema.pre('save', function(next) {
     this.shareableLink = crypto.randomBytes(8).toString('hex');
   }
   this.updatedAt = Date.now();
-  next();
 });
 
 module.exports = mongoose.model('Poem', PoemSchema);
