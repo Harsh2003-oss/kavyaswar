@@ -18,6 +18,11 @@ const PoemSchema = new mongoose.Schema({
   lines: [{
     type: String,
   }],
+  tags: [{                          // ✅ ADD THIS
+    type: String,
+    trim: true,
+    lowercase: true,
+  }],
   isPublic: {
     type: Boolean,
     default: false,
@@ -28,7 +33,7 @@ const PoemSchema = new mongoose.Schema({
   },
   slideInterval: {
     type: Number,
-    default: 3000, // 3 seconds per 2 lines
+    default: 3000,
   },
   narrationSettings: {
     voice: {
@@ -44,6 +49,14 @@ const PoemSchema = new mongoose.Schema({
       default: 1.0,
     },
   },
+  views: {                          // ✅ ADD THIS (for analytics)
+    type: Number,
+    default: 0,
+  },
+  likes: {                          // ✅ ADD THIS (for analytics)
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -55,7 +68,7 @@ const PoemSchema = new mongoose.Schema({
 });
 
 // Generate unique shareable link before saving
-PoemSchema.pre('save', function(next) {
+PoemSchema.pre('save', function() {
   if (!this.shareableLink) {
     this.shareableLink = crypto.randomBytes(8).toString('hex');
   }
