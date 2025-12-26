@@ -9,6 +9,9 @@ router.post('/', auth, poemController.createPoem);
 
 router.get('/', auth, poemController.getMyPoems);
 
+router.get('/search', auth, poemController.searchMyPoems);
+
+router.get('/tags', auth, poemController.getMyTags);
 
 router.get('/share/:link', poemController.getPoemByLink);
 

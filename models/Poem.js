@@ -18,7 +18,7 @@ const PoemSchema = new mongoose.Schema({
   lines: [{
     type: String,
   }],
-  tags: [{                          // ✅ ADD THIS
+  tags: [{
     type: String,
     trim: true,
     lowercase: true,
@@ -42,18 +42,36 @@ const PoemSchema = new mongoose.Schema({
     },
     rate: {
       type: Number,
-      default: 1.0,
+      default: 1.0,  // Speed (0.1 to 10)
     },
     pitch: {
       type: Number,
-      default: 1.0,
+      default: 1.0,  // Pitch (0 to 2)
+    },
+    volume: {                    // ✅ ADD THIS
+      type: Number,
+      default: 1.0,  // Volume (0 to 1)
+    },
+    autoPlay: {                  // ✅ ADD THIS
+      type: Boolean,
+      default: false,
     },
   },
-  views: {                          // ✅ ADD THIS (for analytics)
+  backgroundMusic: {             // ✅ ADD THIS
+    url: {
+      type: String,
+      default: '',
+    },
+    volume: {
+      type: Number,
+      default: 0.3,  // BG music volume (0 to 1)
+    },
+  },
+  views: {
     type: Number,
     default: 0,
   },
-  likes: {                          // ✅ ADD THIS (for analytics)
+  likes: {
     type: Number,
     default: 0,
   },
@@ -67,7 +85,6 @@ const PoemSchema = new mongoose.Schema({
   },
 });
 
-// Generate unique shareable link before saving
 PoemSchema.pre('save', function() {
   if (!this.shareableLink) {
     this.shareableLink = crypto.randomBytes(8).toString('hex');

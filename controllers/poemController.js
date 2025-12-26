@@ -1,24 +1,21 @@
 const Poem = require('../models/Poem');
-
 // Create a new poem
 exports.createPoem = async (req, res) => {
   try {
-    const { title, content, isPublic, slideInterval, narrationSettings } = req.body;
+    const { title, content, isPublic, slideInterval, narrationSettings, tags } = req.body;
 
-    // Validate input
     if (!title || !content) {
       return res.status(400).json({ message: 'Please provide title and content' });
     }
 
-    // Split content into lines (for slideshow)
     const lines = content.split('\n').filter(line => line.trim() !== '');
 
-    // Create new poem
     const poem = new Poem({
-      userId: req.user.id, // From auth middleware
+      userId: req.user.id,
       title,
       content,
       lines,
+      tags: tags || [],  // ✅ ADD THIS
       isPublic: isPublic || false,
       slideInterval: slideInterval || 3000,
       narrationSettings: narrationSettings || {},
@@ -31,7 +28,6 @@ exports.createPoem = async (req, res) => {
       poem,
     });
   } catch (err) {
-    console.log(err.message);
     console.error(err.message);
     res.status(500).json({ message: 'Server error' });
   }
@@ -101,7 +97,7 @@ exports.getPoemByLink = async (req, res) => {
 // Update a poem
 exports.updatePoem = async (req, res) => {
   try {
-    const { title, content, isPublic, slideInterval, narrationSettings } = req.body;
+    const { title, content, isPublic, slideInterval, narrationSettings, tags } = req.body;
 
     let poem = await Poem.findById(req.params.id);
 
@@ -109,12 +105,10 @@ exports.updatePoem = async (req, res) => {
       return res.status(404).json({ message: 'Poem not found' });
     }
 
-    // Check if user owns this poem
     if (poem.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
-    // Update fields
     if (title) poem.title = title;
     if (content) {
       poem.content = content;
@@ -123,6 +117,7 @@ exports.updatePoem = async (req, res) => {
     if (isPublic !== undefined) poem.isPublic = isPublic;
     if (slideInterval) poem.slideInterval = slideInterval;
     if (narrationSettings) poem.narrationSettings = narrationSettings;
+    if (tags) poem.tags = tags;  // ✅ ADD THIS
 
     poem.updatedAt = Date.now();
 
@@ -137,7 +132,6 @@ exports.updatePoem = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 // Delete a poem
 exports.deletePoem = async (req, res) => {
   try {
@@ -158,6 +152,59 @@ exports.deletePoem = async (req, res) => {
   } catch (err) {
     console.error(err.message);
     console.log(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Search poems (for logged-in user)
+exports.searchMyPoems = async (req, res) => {
+  try {
+    const { query, tag } = req.query;
+
+    // Build search criteria
+    let searchCriteria = { userId: req.user.id };
+
+    if (query) {
+      // Search in title and content
+      searchCriteria.$or = [
+        { title: { $regex: query, $options: 'i' } },  // Case-insensitive
+        { content: { $regex: query, $options: 'i' } },
+      ];
+    }
+
+    if (tag) {
+      // Search by tag
+      searchCriteria.tags = { $in: [tag.toLowerCase()] };
+    }
+
+    const poems = await Poem.find(searchCriteria)
+      .sort({ createdAt: -1 });
+
+    res.json({
+      count: poems.length,
+      poems,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get all unique tags for user's poems
+exports.getMyTags = async (req, res) => {
+  try {
+    const poems = await Poem.find({ userId: req.user.id });
+    
+    // Extract all tags and remove duplicates
+    const allTags = poems.flatMap(poem => poem.tags);
+    const uniqueTags = [...new Set(allTags)];
+
+    res.json({
+      count: uniqueTags.length,
+      tags: uniqueTags,
+    });
+  } catch (err) {
+    console.error(err.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
