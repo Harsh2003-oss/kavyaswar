@@ -208,3 +208,214 @@ exports.getMyTags = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Update narration settings for a poem
+exports.updateNarrationSettings = async (req, res) => {
+  try {
+    const { narrationSettings, backgroundMusic } = req.body;
+
+    let poem = await Poem.findById(req.params.id);
+
+    if (!poem) {
+      return res.status(404).json({ message: 'Poem not found' });
+    }
+
+    if (poem.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    // Update narration settings
+    if (narrationSettings) {
+      poem.narrationSettings = {
+        ...poem.narrationSettings,
+        ...narrationSettings,
+      };
+    }
+
+    // Update background music
+    if (backgroundMusic) {
+      poem.backgroundMusic = {
+        ...poem.backgroundMusic,
+        ...backgroundMusic,
+      };
+    }
+
+    poem.updatedAt = Date.now();
+    await poem.save();
+
+    res.json({
+      message: 'Narration settings updated successfully',
+      poem,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get available voices (this will be used by frontend)
+// This endpoint just returns info - actual voices are fetched in browser
+exports.getVoiceInfo = async (req, res) => {
+  try {
+    res.json({
+      message: 'Voice information',
+      info: {
+        type: 'Web Speech API',
+        note: 'Voices are fetched in the browser using speechSynthesis.getVoices()',
+        settings: {
+          rate: {
+            min: 0.1,
+            max: 10,
+            default: 1.0,
+            description: 'Speech speed',
+          },
+          pitch: {
+            min: 0,
+            max: 2,
+            default: 1.0,
+            description: 'Voice pitch',
+          },
+          volume: {
+            min: 0,
+            max: 1,
+            default: 1.0,
+            description: 'Voice volume',
+          },
+        },
+      },
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get list of available background music
+exports.getBackgroundMusic = async (req, res) => {
+  try {
+    const musicList = [
+      {
+        id: 1,
+        name: 'Calm Piano',
+        url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        duration: '6:00',
+      },
+      {
+        id: 2,
+        name: 'Gentle Strings',
+        url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+        duration: '5:30',
+      },
+      {
+        id: 3,
+        name: 'Soft Melody',
+        url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+        duration: '5:00',
+      },
+      {
+        id: 4,
+        name: 'Peaceful Ambient',
+        url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+        duration: '6:30',
+      },
+    ];
+
+    res.json({
+      count: musicList.length,
+      music: musicList,
+      note: 'Users can also provide their own music URL',
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Increment view count (public - when someone views a shared poem)
+exports.incrementViews = async (req, res) => {
+  try {
+    const poem = await Poem.findById(req.params.id);
+
+    if (!poem) {
+      return res.status(404).json({ message: 'Poem not found' });
+    }
+
+    poem.views += 1;
+    await poem.save();
+
+    res.json({
+      message: 'View counted',
+      views: poem.views,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Like a poem (public - anyone can like)
+exports.likePoem = async (req, res) => {
+  try {
+    const poem = await Poem.findById(req.params.id);
+
+    if (!poem) {
+      return res.status(404).json({ message: 'Poem not found' });
+    }
+
+    if (!poem.isPublic) {
+      return res.status(403).json({ message: 'Cannot like private poem' });
+    }
+
+    poem.likes += 1;
+    await poem.save();
+
+    res.json({
+      message: 'Poem liked',
+      likes: poem.likes,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get analytics for all my poems (protected)
+exports.getMyAnalytics = async (req, res) => {
+  try {
+    const poems = await Poem.find({ userId: req.user.id });
+
+    const totalPoems = poems.length;
+    const totalViews = poems.reduce((sum, poem) => sum + poem.views, 0);
+    const totalLikes = poems.reduce((sum, poem) => sum + poem.likes, 0);
+    const publicPoems = poems.filter(poem => poem.isPublic).length;
+
+    // Most viewed poem
+    const mostViewed = poems.reduce((max, poem) => 
+      poem.views > (max.views || 0) ? poem : max, {});
+
+    // Most liked poem
+    const mostLiked = poems.reduce((max, poem) => 
+      poem.likes > (max.likes || 0) ? poem : max, {});
+
+    res.json({
+      totalPoems,
+      totalViews,
+      totalLikes,
+      publicPoems,
+      privatePoems: totalPoems - publicPoems,
+      mostViewed: mostViewed.title ? {
+        id: mostViewed._id,
+        title: mostViewed.title,
+        views: mostViewed.views,
+      } : null,
+      mostLiked: mostLiked.title ? {
+        id: mostLiked._id,
+        title: mostLiked.title,
+        likes: mostLiked.likes,
+      } : null,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
