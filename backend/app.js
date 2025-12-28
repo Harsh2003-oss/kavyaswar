@@ -2,6 +2,8 @@ require("dotenv").config();//Load environment variables
 const connectDB=require("./db/db")
 connectDB();
 
+
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -15,6 +17,12 @@ var poemRouter = require('./routes/poem');
 var commentRouter = require('./routes/comment');
 
 var app = express();
+
+var cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite's default port
+  credentials: true
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
