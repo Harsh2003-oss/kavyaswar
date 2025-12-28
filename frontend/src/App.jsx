@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthProvider';  // ← Changed this line
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
+import CreatePoem from './components/Poem/CreatePoem';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/create-poem" element={<CreatePoem />} />
             <Route path="/" element={<Navigate to="/login" />} />
           </Routes>
         </div>
