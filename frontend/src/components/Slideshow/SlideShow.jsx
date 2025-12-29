@@ -21,7 +21,6 @@ function Slideshow() {
     if (poem && isPlaying && !isPaused) {
       const interval = setInterval(() => {
         setCurrentSlide((prev) => {
-          // Calculate slides (2 lines per slide)
           const totalSlides = Math.ceil(poem.lines.length / 2);
           if (prev < totalSlides - 1) {
             return prev + 1;
@@ -42,7 +41,6 @@ function Slideshow() {
       const response = await poemAPI.getById(id);
       setPoem(response.data);
       
-      // Auto-play narration if enabled
       if (response.data.narrationSettings?.autoPlay) {
         handleNarrate(response.data);
       }
@@ -64,13 +62,54 @@ function Slideshow() {
       return;
     }
 
+    let voices = speechSynthesis.getVoices();
+    
+    if (voices.length === 0) {
+      speechSynthesis.addEventListener('voiceschanged', () => {
+        voices = speechSynthesis.getVoices();
+        speakWithVoice(voices, poemData);
+      });
+    } else {
+      speakWithVoice(voices, poemData);
+    }
+  };
+
+  const speakWithVoice = (voices, poemData) => {
+    const hindiVoices = voices.filter(voice => 
+      voice.lang.includes('hi') || 
+      voice.lang.includes('HI') ||
+      voice.name.toLowerCase().includes('hindi')
+    );
+
+    console.log('Available Hindi voices:', hindiVoices);
+
     const utterance = new SpeechSynthesisUtterance(poemData.content);
-    utterance.rate = poemData.narrationSettings?.rate || 1.0;
+    
+    if (hindiVoices.length > 0) {
+      const preferredVoice = hindiVoices.find(v => 
+        v.name.toLowerCase().includes('female') || 
+        v.name.toLowerCase().includes('natural') ||
+        v.name.toLowerCase().includes('wavenet')
+      ) || hindiVoices[0];
+      
+      utterance.voice = preferredVoice;
+      utterance.lang = 'hi-IN';
+      console.log('Using voice:', preferredVoice.name);
+    } else {
+      console.warn('No Hindi voices available');
+      utterance.lang = 'hi-IN';
+    }
+
+    utterance.rate = poemData.narrationSettings?.rate || 0.85;
     utterance.pitch = poemData.narrationSettings?.pitch || 1.0;
     utterance.volume = poemData.narrationSettings?.volume || 1.0;
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = (e) => {
+      console.error('Speech error:', e);
+      setIsSpeaking(false);
+    };
 
     speechSynthesis.speak(utterance);
   };
@@ -126,14 +165,12 @@ function Slideshow() {
     );
   }
 
-  // Get current lines to display (2 lines per slide)
   const totalSlides = Math.ceil(poem.lines.length / 2);
   const startIndex = currentSlide * 2;
   const currentLines = poem.lines.slice(startIndex, startIndex + 2);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white flex flex-col">
-      {/* Header */}
       <div className="bg-black/30 backdrop-blur-sm p-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
@@ -151,38 +188,30 @@ function Slideshow() {
         </div>
       </div>
 
-      {/* Main Slideshow Content */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="max-w-4xl w-full text-center">
           <div className="bg-black/20 backdrop-blur-md rounded-3xl p-12 shadow-2xl border border-white/10">
-            {/* Current Lines Display */}
             <div className="space-y-6 min-h-[200px] flex flex-col justify-center">
               {currentLines.map((line, index) => (
                 <p
                   key={index}
                   className="text-4xl md:text-5xl font-serif leading-relaxed animate-fade-in"
-                  style={{
-                    animationDelay: `${index * 0.3}s`,
-                  }}
+                  style={{ animationDelay: `${index * 0.3}s` }}
                 >
                   {line}
                 </p>
               ))}
             </div>
 
-            {/* Progress Bar */}
             <div className="mt-12 mb-8">
               <div className="w-full bg-white/20 rounded-full h-2">
                 <div
                   className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${((currentSlide + 1) / totalSlides) * 100}%`,
-                  }}
+                  style={{ width: `${((currentSlide + 1) / totalSlides) * 100}%` }}
                 />
               </div>
             </div>
 
-            {/* Controls */}
             <div className="flex justify-center items-center gap-4 mt-8">
               <button
                 onClick={handlePrevious}
@@ -215,14 +244,11 @@ function Slideshow() {
               </button>
             </div>
 
-            {/* Narration Control */}
             <div className="mt-8 pt-8 border-t border-white/20">
               <button
                 onClick={() => handleNarrate()}
                 className={`px-8 py-3 rounded-lg font-semibold transition-all ${
-                  isSpeaking
-                    ? 'bg-red-500 hover:bg-red-600'
-                    : 'bg-green-500 hover:bg-green-600'
+                  isSpeaking ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
                 }`}
               >
                 {isSpeaking ? '🔇 Stop Narration' : '🎤 Play Narration'}
@@ -232,12 +258,10 @@ function Slideshow() {
         </div>
       </div>
 
-      {/* Footer Info */}
       <div className="bg-black/30 backdrop-blur-sm p-4 text-center text-sm text-gray-300">
         <p>Press Previous/Next to navigate • Click Play to auto-advance slides</p>
       </div>
 
-      {/* CSS for animations */}
       <style jsx>{`
         @keyframes fade-in {
           from {
@@ -249,7 +273,6 @@ function Slideshow() {
             transform: translateY(0);
           }
         }
-
         .animate-fade-in {
           animation: fade-in 0.8s ease-out forwards;
           opacity: 0;
