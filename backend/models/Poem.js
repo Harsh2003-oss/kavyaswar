@@ -1,56 +1,96 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
-const UserSchema = new mongoose.Schema({
-  name: {
+const PoemSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  title: {
     type: String,
     required: true,
   },
-  email: {
+  content: {
     type: String,
     required: true,
-    unique: true,
+  },
+  lines: [{
+    type: String,
+  }],
+  tags: [{
+    type: String,
+    trim: true,
     lowercase: true,
+  }],
+  isPublic: {
+    type: Boolean,
+    default: false,
   },
-  password: {
+  shareableLink: {
     type: String,
-    required: true,
+    unique: true,
   },
-  // ✅ ADD PROFILE FIELDS
-  profile: {
-    bio: {
+  slideInterval: {
+    type: Number,
+    default: 3000,
+  },
+  narrationSettings: {
+    voice: {
+      type: String,
+      default: 'default',
+    },
+    rate: {
+      type: Number,
+      default: 1.0,
+    },
+    pitch: {
+      type: Number,
+      default: 1.0,
+    },
+    volume: {
+      type: Number,
+      default: 1.0,
+    },
+    autoPlay: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  backgroundMusic: {
+    url: {
       type: String,
       default: '',
-      maxlength: 500,
     },
-    phone: {
-      type: String,
-      default: '',
+    volume: {
+      type: Number,
+      default: 0.3,
     },
-    website: {
-      type: String,
-      default: '',
-    },
-    facebook: {
-      type: String,
-      default: '',
-    },
-    instagram: {
-      type: String,
-      default: '',
-    },
-    twitter: {
-      type: String,
-      default: '',
-    },
-    profileImage: {
-      type: String,
-      default: '',
-    },
+  },
+  views: {
+    type: Number,
+    default: 0,
+  },
+  likes: {
+    type: Number,
+    default: 0,
   },
   createdAt: {
     type: Date,
     default: Date.now,
   },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('User', UserSchema);
+PoemSchema.pre('save', function() {
+  if (!this.shareableLink) {
+    this.shareableLink = crypto.randomBytes(8).toString('hex');
+  }
+  this.updatedAt = Date.now();
+});
+
+
+module.exports = mongoose.model('Poem', PoemSchema);

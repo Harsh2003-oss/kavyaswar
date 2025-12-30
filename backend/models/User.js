@@ -15,6 +15,38 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // ✅ ADD PROFILE FIELDS
+  profile: {
+    bio: {
+      type: String,
+      default: '',
+      maxlength: 500,
+    },
+    phone: {
+      type: String,
+      default: '',
+    },
+    website: {
+      type: String,
+      default: '',
+    },
+    facebook: {
+      type: String,
+      default: '',
+    },
+    instagram: {
+      type: String,
+      default: '',
+    },
+    twitter: {
+      type: String,
+      default: '',
+    },
+    profileImage: {
+      type: String,
+      default: '',
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

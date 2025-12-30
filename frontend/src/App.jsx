@@ -7,7 +7,10 @@ import Dashboard from './components/Dashboard/Dashboard';
 import CreatePoem from './components/Poem/CreatePoem';
 import EditPoem from './components/Poem/EditPoem';
 import ViewPoem from './components/Poem/ViewPoem';
-import Slideshow from './components/Slideshow/Slideshow';
+import Slideshow from './components/Slideshow/SlideShow';
+import SharedPoem from './components/Public/SharedPoem';      
+import UserProfile from './components/Profile/UserProfile';   
+import EditProfile from './components/Profile/EditProfile';   
 
 function App() {
   return (
@@ -22,6 +25,9 @@ function App() {
             <Route path="/edit-poem/:id" element={<EditPoem />} />
             <Route path="/poem/:id" element={<ViewPoem />} />
             <Route path="/slideshow/:id" element={<Slideshow />} />
+            <Route path="/shared/:shareLink" element={<SharedPoem />} />      
+            <Route path="/profile/:userId" element={<UserProfile />} />       
+            <Route path="/edit-profile" element={<EditProfile />} />          
             <Route path="/" element={<Navigate to="/login" />} />
           </Routes>
         </div>

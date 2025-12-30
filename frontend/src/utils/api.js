@@ -53,4 +53,11 @@ export const narrationAPI = {
   getBackgroundMusic: () => api.get('/poem/background-music'),
 };
 
+
+export const profileAPI = {
+  getProfile: (userId) => api.get(`/profile/${userId}`),
+  getMyProfile: () => api.get('/profile/me/profile'),
+  updateProfile: (data) => api.put('/profile/me/profile', data),
+};
+
 export default api;
