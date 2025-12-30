@@ -10,6 +10,7 @@ function Dashboard() {
   const [poems, setPoems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
     fetchPoems();
@@ -78,14 +79,62 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold">My Poems</h1>
+            
+            {/* User Menu */}
             <div className="flex items-center gap-4">
-              <span className="text-lg">Welcome, {user?.name}!</span>
-              <button
-                onClick={handleLogout}
-                className="px-6 py-2 bg-white/20 border-2 border-white rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-all"
-              >
-                Logout
-              </button>
+              <span className="text-lg hidden sm:inline">Welcome, {user?.name}!</span>
+              
+              {/* Profile Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/20 border-2 border-white rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-all"
+                >
+                  <span>👤</span>
+                  <span className="hidden sm:inline">Profile</span>
+                  <span className="text-sm">{showProfileMenu ? '▲' : '▼'}</span>
+                </button>
+
+                {/* Dropdown Menu */}
+                {showProfileMenu && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 z-50">
+                    <button
+                      onClick={() => {
+                        navigate(`/profile/${user?._id}`);
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-3"
+                    >
+                      <span>👁️</span>
+                      <span className="font-semibold">View My Profile</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        navigate('/edit-profile');
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-3"
+                    >
+                      <span>✏️</span>
+                      <span className="font-semibold">Edit Profile</span>
+                    </button>
+
+                    <div className="border-t my-2"></div>
+                    
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
+                    >
+                      <span>🚪</span>
+                      <span className="font-semibold">Logout</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -234,6 +283,14 @@ function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Click outside to close dropdown */}
+      {showProfileMenu && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowProfileMenu(false)}
+        />
+      )}
     </div>
   );
 }

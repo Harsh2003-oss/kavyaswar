@@ -16,6 +16,7 @@ var authRouter = require('./routes/auth');
 var poemRouter = require('./routes/poem');
 var commentRouter = require('./routes/comment');
 var profileRouter = require('./routes/profile');
+var multer = require('multer');
 
 var app = express();
 
@@ -41,6 +42,7 @@ app.use('/auth', authRouter);
 app.use('/poem', poemRouter);
 app.use('/comment', commentRouter);
 app.use('/profile', profileRouter);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -50,7 +50,7 @@ function UserProfile() {
           <div className="mb-4">
             {profile.profile?.profileImage ? (
               <img
-                src={profile.profile.profileImage}
+                src={`http://localhost:3000${profile.profile.profileImage}`}
                 alt={profile.name}
                 className="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-lg object-cover"
               />
@@ -126,7 +126,7 @@ function UserProfile() {
                     href={profile.profile.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center"
+                    className="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
                   >
                     📘
                   </a>
@@ -137,7 +137,7 @@ function UserProfile() {
                     href={profile.profile.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 bg-pink-600 text-white rounded-lg flex items-center justify-center"
+                    className="w-12 h-12 bg-pink-600 text-white rounded-lg flex items-center justify-center hover:bg-pink-700 transition-colors"
                   >
                     📷
                   </a>
@@ -148,7 +148,7 @@ function UserProfile() {
                     href={profile.profile.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 bg-sky-500 text-white rounded-lg flex items-center justify-center"
+                    className="w-12 h-12 bg-sky-500 text-white rounded-lg flex items-center justify-center hover:bg-sky-600 transition-colors"
                   >
                     🐦
                   </a>
