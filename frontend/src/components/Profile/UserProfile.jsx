@@ -18,7 +18,6 @@ function UserProfile() {
       const response = await axios.get(`http://localhost:3000/profile/${userId}`);
       setProfile(response.data);
     } catch (error) {
-      console.error('Error fetching profile:', error);
       alert('Profile not found');
       navigate(-1);
     } finally {
@@ -28,132 +27,85 @@ function UserProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading profile...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-indigo-100">
+        <div className="animate-pulse text-xl font-semibold">Loading profile…</div>
       </div>
     );
   }
 
-  if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Profile not found</div>
-      </div>
-    );
-  }
+  if (!profile) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="mb-4">
-            {profile.profile?.profileImage ? (
-              <img
-                src={`http://localhost:3000${profile.profile.profileImage}`}
-                alt={profile.name}
-                className="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-lg object-cover"
-              />
-            ) : (
-              <div className="w-32 h-32 rounded-full mx-auto bg-white/20 flex items-center justify-center text-6xl">
-                👤
-              </div>
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50">
+      
+      {/* HEADER */}
+      <header className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-90" />
+        <div className="relative max-w-4xl mx-auto px-4 py-14 text-center text-white animate-fadeIn">
+          
+          {/* Avatar */}
+          <div className="relative w-36 h-36 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 animate-spinSlow" />
+            <div className="absolute inset-1 rounded-full bg-white flex items-center justify-center overflow-hidden">
+              {profile.profile?.profileImage ? (
+                <img
+                  src={`http://localhost:3000${profile.profile.profileImage}`}
+                  alt={profile.name}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <span className="text-6xl">👤</span>
+              )}
+            </div>
           </div>
-          <h1 className="text-4xl font-bold mb-2">{profile.name}</h1>
-          <p className="text-purple-200">
-            Poet • Member since {new Date(profile.createdAt).getFullYear()}
+
+          <h1 className="text-4xl font-extrabold tracking-wide">
+            {profile.name}
+          </h1>
+          <p className="mt-2 text-purple-200">
+            ✍️ Poet • Member since {new Date(profile.createdAt).getFullYear()}
           </p>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* CONTENT */}
+      <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
+
         <button
           onClick={() => navigate(-1)}
-          className="mb-6 px-4 py-2 text-gray-600 hover:text-gray-800 font-semibold"
+          className="text-sm font-semibold text-purple-600 hover:underline"
         >
           ← Back
         </button>
 
-        {/* About */}
+        {/* ABOUT */}
         {profile.profile?.bio && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">About</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">
+          <section className="glass-card animate-slideUp">
+            <h2 className="section-title">About</h2>
+            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
               {profile.profile.bio}
             </p>
-          </div>
+          </section>
         )}
 
-        {/* Contact */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">
-            Contact Information
-          </h2>
+        {/* CONTACT */}
+        <section className="glass-card animate-slideUp delay-200">
+          <h2 className="section-title">Contact</h2>
 
           <div className="space-y-4">
             {profile.profile?.phone && (
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">📞</span>
-                <a
-                  href={`tel:${profile.profile.phone}`}
-                  className="text-blue-600 hover:underline"
-                >
-                  {profile.profile.phone}
-                </a>
-              </div>
+              <ContactRow icon="📞" value={profile.profile.phone} link={`tel:${profile.profile.phone}`} />
             )}
 
             {profile.profile?.website && (
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🌐</span>
-                <a
-                  href={profile.profile.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  {profile.profile.website}
-                </a>
-              </div>
+              <ContactRow icon="🌐" value={profile.profile.website} link={profile.profile.website} />
             )}
 
-            {/* Social Media */}
-            <div className="pt-4 border-t">
-              <div className="flex gap-4">
-                {profile.profile?.facebook && (
-                  <a
-                    href={profile.profile.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
-                  >
-                    📘
-                  </a>
-                )}
-
-                {profile.profile?.instagram && (
-                  <a
-                    href={profile.profile.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 bg-pink-600 text-white rounded-lg flex items-center justify-center hover:bg-pink-700 transition-colors"
-                  >
-                    📷
-                  </a>
-                )}
-
-                {profile.profile?.twitter && (
-                  <a
-                    href={profile.profile.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 bg-sky-500 text-white rounded-lg flex items-center justify-center hover:bg-sky-600 transition-colors"
-                  >
-                    🐦
-                  </a>
-                )}
-              </div>
+            {/* SOCIALS */}
+            <div className="pt-6 flex gap-4">
+              {profile.profile?.facebook && <Social icon="📘" link={profile.profile.facebook} />}
+              {profile.profile?.instagram && <Social icon="📷" link={profile.profile.instagram} />}
+              {profile.profile?.twitter && <Social icon="🐦" link={profile.profile.twitter} />}
             </div>
 
             {!profile.profile?.phone &&
@@ -161,14 +113,93 @@ function UserProfile() {
               !profile.profile?.facebook &&
               !profile.profile?.instagram &&
               !profile.profile?.twitter && (
-                <p className="text-gray-500 text-center">
+                <p className="text-gray-500 text-center italic">
                   No contact information available
                 </p>
               )}
           </div>
-        </div>
+        </section>
       </div>
+
+      {/* INLINE STYLES */}
+      <style>{`
+        .glass-card {
+          background: rgba(255,255,255,0.65);
+          backdrop-filter: blur(12px);
+          border-radius: 1.25rem;
+          padding: 2rem;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-bottom: 1rem;
+          color: #1f2937;
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 1s ease forwards;
+        }
+
+        .animate-slideUp {
+          animation: slideUp 0.8s ease forwards;
+        }
+
+        .delay-200 {
+          animation-delay: 0.2s;
+        }
+
+        .animate-spinSlow {
+          animation: spin 12s linear infinite;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
+  );
+}
+
+function ContactRow({ icon, value, link }) {
+  return (
+    <div className="flex items-center gap-3 hover:translate-x-1 transition">
+      <span className="text-2xl">{icon}</span>
+      <a href={link} className="text-blue-600 hover:underline">
+        {value}
+      </a>
+    </div>
+  );
+}
+
+function Social({ icon, link }) {
+  return (
+    <a
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 text-white text-xl hover:scale-110 transition"
+    >
+      {icon}
+    </a>
   );
 }
 

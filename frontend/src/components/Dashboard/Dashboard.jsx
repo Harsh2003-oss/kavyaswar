@@ -6,7 +6,7 @@ import { poemAPI } from '../../utils/api';
 function Dashboard() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  
+
   const [poems, setPoems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,7 +39,6 @@ function Dashboard() {
         await poemAPI.delete(id);
         setPoems(poems.filter(poem => poem._id !== id));
       } catch (error) {
-        console.error('Error deleting poem:', error);
         alert('Failed to delete poem');
       }
     }
@@ -47,200 +46,141 @@ function Dashboard() {
 
   const handleSearch = async () => {
     if (searchQuery.trim()) {
-      try {
-        const response = await poemAPI.search(searchQuery);
-        setPoems(response.data.poems);
-      } catch (error) {
-        console.error('Error searching:', error);
-      }
+      const response = await poemAPI.search(searchQuery);
+      setPoems(response.data.poems);
     } else {
       fetchPoems();
     }
   };
 
   const copyShareLink = (shareableLink) => {
-  if (!shareableLink) {
-    alert('Shareable link not available for this poem');
-    return;
-  }
-  
-  const url = `${window.location.origin}/share/${shareableLink}`;
-  
-  navigator.clipboard.writeText(url).then(() => {
-    alert('Share link copied to clipboard! 🎉\n\n' + url);
-  }).catch(err => {
-    console.error('Failed to copy:', err);
-    alert('Failed to copy link. Please try again.');
-  });
-};
+    if (!shareableLink) return;
+    const url = `${window.location.origin}/share/${shareableLink}`;
+    navigator.clipboard.writeText(url);
+    alert('Share link copied ✨');
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-xl text-gray-600">Loading poems...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-pink-900 text-white">
+        <div className="text-2xl animate-pulse">Loading your poetry...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">My Poems</h1>
-            
-            {/* User Menu */}
-            <div className="flex items-center gap-4">
-              <span className="text-lg hidden sm:inline">Welcome, {user?.name}!</span>
-              
-              {/* Profile Dropdown */}
-              <div className="relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-purple-50 to-pink-50">
+      {/* HEADER */}
+      <header className="relative bg-gradient-to-r from-purple-700 via-indigo-700 to-pink-700 text-white shadow-2xl">
+        <div className="max-w-7xl mx-auto px-6 py-10 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-wide">My Poems</h1>
+            <p className="text-white/80 italic mt-1">Let your words breathe ✨</p>
+          </div>
+
+          <div className="relative">
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="flex items-center gap-3 px-5 py-3 bg-white/20 rounded-full hover:bg-white hover:text-purple-700 transition-all"
+            >
+              👤 {user?.name}
+            </button>
+
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl z-50">
                 <button
-                  onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/20 border-2 border-white rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-all"
+                  onClick={() => navigate(`/profile/${user?._id}`)}
+                  className="w-full px-4 py-3 text-left hover:bg-purple-50 text-black"
                 >
-                  <span>👤</span>
-                  <span className="hidden sm:inline">Profile</span>
-                  <span className="text-sm">{showProfileMenu ? '▲' : '▼'}</span>
+                  👁️ View Profile
                 </button>
-
-                {/* Dropdown Menu */}
-                {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 z-50">
-                    <button
-                      onClick={() => {
-                        navigate(`/profile/${user?._id}`);
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-3"
-                    >
-                      <span>👁️</span>
-                      <span className="font-semibold">View My Profile</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => {
-                        navigate('/edit-profile');
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-3"
-                    >
-                      <span>✏️</span>
-                      <span className="font-semibold">Edit Profile</span>
-                    </button>
-
-                    <div className="border-t my-2"></div>
-                    
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
-                    >
-                      <span>🚪</span>
-                      <span className="font-semibold">Logout</span>
-                    </button>
-                  </div>
-                )}
+                <button
+                  onClick={() => navigate('/edit-profile')}
+                  className="w-full px-4 py-3 text-left hover:bg-purple-50 text-black"
+                >
+                  ✏️ Edit Profile
+                </button>
+                <div className="border-t" />
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-3 text-left text-red-600 hover:bg-red-50"
+                >
+                  🚪 Logout
+                </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Toolbar */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-          {/* Search Bar */}
-          <div className="flex gap-2 w-full sm:w-auto">
+      {/* CONTENT */}
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        {/* SEARCH */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-between mb-12">
+          <div className="relative w-full sm:w-[420px]">
             <input
               type="text"
-              placeholder="Search poems..."
+              placeholder="Search emotions, words, feelings..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 sm:w-80 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full px-6 py-4 rounded-full shadow-md focus:ring-4 focus:ring-purple-300 outline-none"
             />
-            <button
-              onClick={handleSearch}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-            >
-              Search
-            </button>
-            {searchQuery && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  fetchPoems();
-                }}
-                className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition-colors"
-              >
-                Clear
-              </button>
-            )}
+            <span className="absolute right-6 top-4">🔍</span>
           </div>
 
-          {/* Create Button */}
           <button
             onClick={() => navigate('/create-poem')}
-            className="w-full sm:w-auto px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+            className="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg hover:scale-105 transition"
           >
-            + Create New Poem
+            ✍️ Write New Poem
           </button>
         </div>
 
-        {/* Empty State */}
+        {/* EMPTY STATE */}
         {poems.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl shadow-md">
-            <h2 className="text-3xl font-bold text-gray-800 mb-3">No poems yet</h2>
-            <p className="text-gray-600 mb-8">Create your first poem to get started!</p>
+          <div className="text-center py-32 bg-white/70 backdrop-blur rounded-3xl shadow-xl">
+            <h2 className="text-4xl font-bold mb-4">Your canvas is empty 🎨</h2>
+            <p className="text-gray-600 mb-8 italic">Start with a thought, end with a poem</p>
             <button
               onClick={() => navigate('/create-poem')}
-              className="px-8 py-4 bg-purple-600 text-white rounded-lg text-lg font-semibold hover:bg-purple-700 hover:shadow-lg transform hover:-translate-y-1 transition-all"
+              className="px-10 py-5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-lg font-semibold hover:scale-105 transition"
             >
-              Create Your First Poem
+              Create First Poem
             </button>
           </div>
         ) : (
-          /* Poems Grid */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {poems.map((poem) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {poems.map(poem => (
               <div
                 key={poem._id}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all p-6 flex flex-col gap-4"
+                className="group bg-white/80 backdrop-blur-lg rounded-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all p-6 flex flex-col gap-4"
               >
-                {/* Header */}
-                <div className="flex justify-between items-start gap-3">
-                  <h3 className="text-xl font-bold text-gray-800 flex-1">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-2xl font-bold group-hover:text-purple-700 transition">
                     {poem.title}
                   </h3>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    className={`px-4 py-1 rounded-full text-xs font-semibold ${
                       poem.isPublic
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
                     }`}
                   >
                     {poem.isPublic ? 'Public' : 'Private'}
                   </span>
                 </div>
 
-                {/* Content Preview */}
-                <div className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                  {poem.content.substring(0, 150)}
-                  {poem.content.length > 150 && '...'}
-                </div>
+                <p className="text-gray-600 italic line-clamp-4">
+                  {poem.content}
+                </p>
 
-                {/* Tags */}
                 {poem.tags?.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {poem.tags.slice(0, 3).map((tag, index) => (
+                    {poem.tags.map((tag, i) => (
                       <span
-                        key={index}
-                        className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold"
+                        key={i}
+                        className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs"
                       >
                         #{tag}
                       </span>
@@ -248,45 +188,42 @@ function Dashboard() {
                   </div>
                 )}
 
-                {/* Stats */}
-                <div className="flex gap-4 text-sm text-gray-600">
-                  <span>👁️ {poem.views || 0} views</span>
-                  <span>❤️ {poem.likes || 0} likes</span>
+                <div className="flex gap-6 text-sm text-gray-500">
+                  <span>👁️ {poem.views || 0}</span>
+                  <span>❤️ {poem.likes || 0}</span>
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
+                <div className="flex gap-2 pt-4 mt-auto border-t">
                   <button
                     onClick={() => navigate(`/poem/${poem._id}`)}
-                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white rounded-full py-2"
                   >
                     View
                   </button>
                   <button
                     onClick={() => navigate(`/edit-poem/${poem._id}`)}
-                    className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition-colors"
+                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full py-2"
                   >
                     Edit
                   </button>
                   {poem.isPublic && (
                     <button
                       onClick={() => copyShareLink(poem.shareableLink)}
-                      className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
+                      className="flex-1 bg-green-500 hover:bg-green-600 text-white rounded-full py-2"
                     >
                       Share
                     </button>
                   )}
                   <button
                     onClick={() => handleDelete(poem._id)}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                    className="bg-red-500 hover:bg-red-600 text-white rounded-full px-4"
                   >
-                    Delete
+                    🗑️
                   </button>
                 </div>
 
-                {/* Date */}
-                <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
-                  Created: {new Date(poem.createdAt).toLocaleDateString()}
+                <div className="text-xs text-gray-400 text-right">
+                  {new Date(poem.createdAt).toLocaleDateString()}
                 </div>
               </div>
             ))}
@@ -294,7 +231,6 @@ function Dashboard() {
         )}
       </div>
 
-      {/* Click outside to close dropdown */}
       {showProfileMenu && (
         <div
           className="fixed inset-0 z-40"
