@@ -17,6 +17,10 @@ function CreatePoem() {
       volume: 1.0,
       autoPlay: false,
     },
+    backgroundMusic: {
+      url: '',
+      volume: 0.3,
+    },
   });
 
   const [loading, setLoading] = useState(false);
@@ -41,6 +45,26 @@ function CreatePoem() {
     });
   };
 
+  const handleMusicUrlChange = (e) => {
+    setFormData({
+      ...formData,
+      backgroundMusic: {
+        ...formData.backgroundMusic,
+        url: e.target.value
+      }
+    });
+  };
+
+  const handleMusicVolumeChange = (e) => {
+    setFormData({
+      ...formData,
+      backgroundMusic: {
+        ...formData.backgroundMusic,
+        volume: parseFloat(e.target.value)
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -53,7 +77,6 @@ function CreatePoem() {
     setLoading(true);
 
     try {
-      // Convert comma-separated tags to array
       const tagsArray = formData.tags
         .split(',')
         .map(tag => tag.trim())
@@ -66,6 +89,7 @@ function CreatePoem() {
         isPublic: formData.isPublic,
         slideInterval: parseInt(formData.slideInterval),
         narrationSettings: formData.narrationSettings,
+        backgroundMusic: formData.backgroundMusic,
       };
 
       await poemAPI.create(poemData);
@@ -81,7 +105,6 @@ function CreatePoem() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Create New Poem</h1>
           <button
@@ -92,14 +115,12 @@ function CreatePoem() {
           </button>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
             {error}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-8 space-y-6">
           {/* Title */}
           <div>
@@ -169,6 +190,49 @@ function CreatePoem() {
             </label>
           </div>
 
+          {/* Background Music - SIMPLE VERSION */}
+          <div className="border-t pt-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">
+              🎵 Background Music (Optional)
+            </h3>
+            
+            <div className="mb-4">
+              <label className="block text-gray-700 font-semibold mb-2">
+                Music URL
+              </label>
+              <input
+                type="url"
+                value={formData.backgroundMusic.url}
+                onChange={handleMusicUrlChange}
+                placeholder="Paste music URL here (leave empty for no music)"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                💡 Leave empty if you don't want background music
+              </p>
+            </div>
+
+            {formData.backgroundMusic.url && (
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Music Volume
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={formData.backgroundMusic.volume}
+                  onChange={handleMusicVolumeChange}
+                  className="w-full"
+                />
+                <p className="text-sm text-gray-600 text-center mt-1">
+                  {Math.round(formData.backgroundMusic.volume * 100)}%
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Slideshow Settings */}
           <div className="border-t pt-6">
             <h3 className="text-xl font-bold text-gray-800 mb-4">
@@ -202,7 +266,6 @@ function CreatePoem() {
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Speech Rate */}
               <div>
                 <label className="block text-gray-700 font-semibold mb-2">
                   Speech Rate
@@ -222,7 +285,6 @@ function CreatePoem() {
                 </p>
               </div>
 
-              {/* Pitch */}
               <div>
                 <label className="block text-gray-700 font-semibold mb-2">
                   Pitch
@@ -242,7 +304,6 @@ function CreatePoem() {
                 </p>
               </div>
 
-              {/* Volume */}
               <div>
                 <label className="block text-gray-700 font-semibold mb-2">
                   Volume
@@ -263,7 +324,6 @@ function CreatePoem() {
               </div>
             </div>
 
-            {/* Auto Play */}
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg mt-6">
               <input
                 type="checkbox"
