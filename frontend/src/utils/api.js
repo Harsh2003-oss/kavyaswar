@@ -39,6 +39,7 @@ export const poemAPI = {
   getTags: () => api.get('/poem/tags'),
   getAnalytics: () => api.get('/poem/analytics'),
   like: (id) => api.post(`/poem/${id}/like`),
+  incrementViews: (id) => api.post(`/poem/${id}/view`), // ✅ ADDED - For view counter
   updateNarration: (id, data) => api.put(`/poem/${id}/narration`, data),
 };
 
@@ -53,11 +54,14 @@ export const narrationAPI = {
   getBackgroundMusic: () => api.get('/poem/background-music'),
 };
 
-
 export const profileAPI = {
   getProfile: (userId) => api.get(`/profile/${userId}`),
   getMyProfile: () => api.get('/profile/me/profile'),
   updateProfile: (data) => api.put('/profile/me/profile', data),
+  uploadImage: (formData) => api.post('/profile/me/profile/image', formData, { // ✅ ADDED - For image upload
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  deleteImage: () => api.delete('/profile/me/profile/image'), // ✅ ADDED - For image deletion
 };
 
 export default api;

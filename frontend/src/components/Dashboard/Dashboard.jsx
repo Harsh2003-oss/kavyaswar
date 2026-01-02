@@ -58,11 +58,21 @@ function Dashboard() {
     }
   };
 
-  const copyShareLink = (shareLink) => {
-    const url = `${window.location.origin}/poem/${shareLink}`;
-    navigator.clipboard.writeText(url);
-    alert('Share link copied to clipboard!');
-  };
+  const copyShareLink = (shareableLink) => {
+  if (!shareableLink) {
+    alert('Shareable link not available for this poem');
+    return;
+  }
+  
+  const url = `${window.location.origin}/share/${shareableLink}`;
+  
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Share link copied to clipboard! 🎉\n\n' + url);
+  }).catch(err => {
+    console.error('Failed to copy:', err);
+    alert('Failed to copy link. Please try again.');
+  });
+};
 
   if (loading) {
     return (

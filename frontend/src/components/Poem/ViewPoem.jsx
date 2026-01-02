@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { poemAPI } from '../../utils/api';
+import { poemAPI, commentAPI } from '../../utils/api';
 
 function ViewPoem() {
   const { id } = useParams();
   const navigate = useNavigate();
   
   const [poem, setPoem] = useState(null);
+  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
     fetchPoem();
+    fetchComments();
   }, [id]);
 
   const fetchPoem = async () => {
@@ -25,6 +27,30 @@ function ViewPoem() {
       setError('Failed to load poem');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchComments = async () => {
+    try {
+      const response = await commentAPI.getAll(id);
+      setComments(response.data.comments);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+
+    try {
+      await commentAPI.delete(commentId);
+      setComments(comments.filter(c => c._id !== commentId));
+      alert('Comment deleted successfully! ✅');
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      alert('Failed to delete comment');
     }
   };
 
@@ -117,9 +143,13 @@ function ViewPoem() {
       alert('This poem is private. Make it public first to share!');
       return;
     }
-    const url = `${window.location.origin}/shared/${poem.shareableLink}`;
-    navigator.clipboard.writeText(url);
-    alert('Share link copied to clipboard!');
+    const url = `${window.location.origin}/share/${poem.shareableLink}`;
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Share link copied to clipboard! 🎉\n\n' + url);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      alert('Failed to copy link. Please try again.');
+    });
   };
 
   if (loading) {
@@ -177,7 +207,7 @@ function ViewPoem() {
         </div>
 
         {/* Poem Card */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           {/* Title and Status */}
           <div className="flex justify-between items-start mb-6">
             <h1 className="text-4xl font-bold text-gray-800">{poem.title}</h1>
@@ -217,6 +247,7 @@ function ViewPoem() {
           <div className="flex gap-6 text-gray-600 mb-8 pb-8 border-b">
             <span className="text-lg">👁️ {poem.views || 0} views</span>
             <span className="text-lg">❤️ {poem.likes || 0} likes</span>
+            <span className="text-lg">💬 {comments.length} comments</span>
             <span className="text-lg">
               📅 {new Date(poem.createdAt).toLocaleDateString()}
             </span>
@@ -258,6 +289,99 @@ function ViewPoem() {
             )}
           </div>
         </div>
+
+        {/* Comments Section - Only show if poem is public */}
+        {poem.isPublic && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">💬</span>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Comments ({comments.length})
+                </h2>
+              </div>
+              {comments.length > 0 && (
+                <span className="text-sm text-gray-500">
+                  As the author, you can delete inappropriate comments
+                </span>
+              )}
+            </div>
+
+            {comments.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-xl">
+                <div className="text-6xl mb-4">💭</div>
+                <p className="text-xl text-gray-600 font-semibold mb-2">No comments yet</p>
+                <p className="text-gray-500">Share your poem to start receiving comments!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <div
+                    key={comment._id}
+                    className="p-6 bg-gradient-to-br from-gray-50 to-purple-50 border-2 border-purple-100 rounded-xl hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-4 flex-1">
+                        {/* Avatar */}
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-indigo-400 flex items-center justify-center text-white text-xl font-bold">
+                            {comment.guestName.charAt(0).toUpperCase()}
+                          </div>
+                        </div>
+
+                        {/* Comment Content */}
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-3 mb-2">
+                            <p className="font-bold text-gray-800 text-lg">
+                              {comment.guestName}
+                            </p>
+                            {comment.guestEmail && (
+                              <>
+                                <span className="text-sm text-gray-400">•</span>
+                                <p className="text-sm text-gray-600">
+                                  {comment.guestEmail}
+                                </p>
+                              </>
+                            )}
+                            <span className="text-sm text-gray-400">•</span>
+                            <p className="text-sm text-gray-600">
+                              {new Date(comment.createdAt).toLocaleString()}
+                            </p>
+                          </div>
+                          <p className="text-gray-700 leading-relaxed">
+                            {comment.comment}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => handleDeleteComment(comment._id)}
+                        className="flex-shrink-0 px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors"
+                        title="Delete this comment"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Private Poem Notice */}
+        {!poem.isPublic && (
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6 text-center">
+            <div className="text-4xl mb-3">🔒</div>
+            <p className="text-lg font-semibold text-gray-800 mb-2">
+              This poem is private
+            </p>
+            <p className="text-gray-600">
+              Make it public to receive comments from readers. Edit the poem to change its visibility.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

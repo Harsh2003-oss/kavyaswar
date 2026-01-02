@@ -25,7 +25,7 @@ function App() {
             <Route path="/edit-poem/:id" element={<EditPoem />} />
             <Route path="/poem/:id" element={<ViewPoem />} />
             <Route path="/slideshow/:id" element={<Slideshow />} />
-            <Route path="/shared/:shareLink" element={<SharedPoem />} />      
+            <Route path="/share/:link" element={<SharedPoem />} />      
             <Route path="/profile/:userId" element={<UserProfile />} />       
             <Route path="/edit-profile" element={<EditProfile />} />          
             <Route path="/" element={<Navigate to="/login" />} />
