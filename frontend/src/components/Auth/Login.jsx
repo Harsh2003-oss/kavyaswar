@@ -97,10 +97,10 @@ function Login() {
           </div>
           
           <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-2">
-            Kavyaswar
+           विचार मंथन
           </h1>
           <p className="text-center text-gray-600 italic mb-8">
-            "Where words dance and hearts speak"
+           काव्यस्वर
           </p>
           
           {error && (
@@ -171,10 +171,10 @@ function Login() {
           {/* Decorative Quote */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <p className="text-center text-gray-500 italic text-sm">
-              "Poetry is when an emotion has found its thought<br/>and the thought has found words."
-            </p>
+           कविता तब जन्म लेती है,
+            जब भावना को विचार मिलते हैं और विचारों को शब्द। </p>
             <p className="text-center text-gray-400 text-xs mt-2">
-              — Robert Frost
+              — 🌿
             </p>
           </div>
         </div>
