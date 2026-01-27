@@ -16,9 +16,10 @@
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^9.0.3",
     "morgan": "~1.9.1",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "mongoose": "^9.1.5"
   },
   "devDependencies": {
-    "mongoose": "^9.0.2"
+    
   }
 }

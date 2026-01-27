@@ -22,7 +22,7 @@ var app = express();
 
 var cors = require('cors');
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite's default port
+  origin: process.env.CLIENT_URL,
   credentials: true
 }));
 
