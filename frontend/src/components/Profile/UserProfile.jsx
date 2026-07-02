@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+const API_URL = import.meta.env.VITE_API_URL;
 
 function UserProfile() {
   const { userId } = useParams();
@@ -15,7 +16,7 @@ function UserProfile() {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/profile/${userId}`);
+      const response = await axios.get(`${API_URL}/profile/${userId}`);
       setProfile(response.data);
     } catch (error) {
       alert('Profile not found');
@@ -49,7 +50,7 @@ function UserProfile() {
             <div className="absolute inset-1 rounded-full bg-white flex items-center justify-center overflow-hidden">
               {profile.profile?.profileImage ? (
                 <img
-                  src={`http://localhost:3000${profile.profile.profileImage}`}
+                  src={`${API_URL}${profile.profile.profileImage}`}
                   alt={profile.name}
                   className="w-full h-full object-cover rounded-full"
                 />

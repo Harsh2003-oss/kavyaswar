@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
+const API_URL = import.meta.env.VITE_API_URL;
 
 function EditProfile() {
   const { user } = useContext(AuthContext);
@@ -29,7 +30,7 @@ function EditProfile() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/profile/me/profile', {
+      const response = await axios.get(`${API_URL}/profile/me/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -96,7 +97,7 @@ function EditProfile() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:3000/profile/me/profile/image',
+        `${API_URL}/profile/me/profile/image`,
         formDataImage,
         {
           headers: {
@@ -125,7 +126,7 @@ function EditProfile() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete('http://localhost:3000/profile/me/profile/image', {
+      await axios.delete(`${API_URL}/profile/me/profile/image`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -146,7 +147,7 @@ function EditProfile() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        'http://localhost:3000/profile/me/profile',
+        `${API_URL}/profile/me/profile`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -184,7 +185,7 @@ function EditProfile() {
               <div className="flex-shrink-0">
                 {imagePreview || currentImage ? (
                   <img
-                    src={imagePreview || `http://localhost:3000${currentImage}`}
+                    src={imagePreview || `${API_URL}${currentImage}`}
                     alt="Profile"
                     className="w-32 h-32 rounded-full object-cover border-4 border-purple-200"
                   />
