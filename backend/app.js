@@ -22,8 +22,10 @@ var app = express();
 
 var cors = require('cors');
 app.use(cors({
-  origin: 'https://kavyaswar.vercel.app',
+  origin: process.env.CLIENT_URL,
   credentials: true
+    methods:["GET","PUT","DELETE","POST"]
+
 }));
 
 // view engine setup
