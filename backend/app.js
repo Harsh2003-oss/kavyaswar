@@ -22,7 +22,7 @@ var app = express();
 
 var cors = require('cors');
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: 'https://kavyaswar.vercel.app',
   credentials: true
 }));
 
